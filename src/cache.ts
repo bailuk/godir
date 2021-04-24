@@ -3,24 +3,15 @@ import { Directory } from "./directory";
 
 
 export class Cache {
-    private readonly maxLen = 50
 
+    private readonly maxLen = 50
     private readonly cache : Directory[] = []
+
 
     constructor() {}
 
-    private push(dir : Directory) : void {
-        if (this.cache.indexOf(dir) < 0) {
-            this.cache.push(dir)
 
-            if (this.cache.length > this.maxLen) {
-                this.cache.shift()
-            }
-        }
-    }
-
-
-    private find(parentPath : string, name : string) {
+    private find(parentPath : string, name : string) : Directory {
         let result = null
 
         this.cache.every((element) => {
@@ -47,9 +38,18 @@ export class Cache {
     }
 
 
+    private push(dir : Directory) : void {
+        const len = this.cache.unshift(dir)
+
+        if (len > this.maxLen) {
+            this.cache.pop()
+        }
+    }
+
+
     public log() : void {
-        this.cache.forEach(element => {
-            element.log()
-        });
+        this.cache.forEach(dir => {
+            dir.log()
+        })
     }
 }
