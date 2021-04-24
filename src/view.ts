@@ -10,6 +10,7 @@ const KEY_DOWN  = 65364
 const KEY_LEFT  = 65361
 const KEY_RIGHT = 65363
 const KEY_UP    = 65362
+const KEY_ESC   = 65307
 
 export class View {
     readonly PADDING : Number = 5
@@ -53,11 +54,13 @@ export class View {
         // })
         
         win.on('key-press-event', (key) => {
-            if (key.keyval == KEY_N) {
-                console.log(key)
-                return true
 
+            if (key.keyval == KEY_ESC) {
+                Gtk.mainQuit()
+                return true
             }
+            
+            console.log(key.string, key.keyval, key.state)
             return false
         })
     }
