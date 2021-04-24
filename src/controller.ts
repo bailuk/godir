@@ -43,8 +43,14 @@ export class Controller {
 
 
     public select(index : number) {
-        const dir = this.model[index]
-        this.fillList(dir.getParentPath(), dir.getName())
+        if (index < this.model.length) {
+            const dir = this.model[index]
+            if (dir.equals(this.dir)) {
+                console.log(`open ${dir.getPath()}`)
+            } else {
+                this.fillList(dir.getParentPath(), dir.getName())
+            }
+        }
     }
 
 

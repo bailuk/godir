@@ -14,9 +14,9 @@ export class Cache {
     private find(parentPath : string, name : string) : Directory {
         let result = null
 
-        this.cache.every((element) => {
-            if (element.getName() == name && element.getParentPath() == parentPath) {
-                result = element
+        this.cache.every((dir) => {
+            if (dir.equalsStr(parentPath, name)) {
+                result = dir
                 return false // break
             } else {
                 return true

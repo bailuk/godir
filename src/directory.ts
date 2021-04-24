@@ -93,6 +93,15 @@ export class Directory {
     }
 
 
+    
+    public equals(dir : Directory) : boolean {
+        return (dir !== null && this.equalsStr(dir.getPath(), dir.getName()))
+    }
+
+    public equalsStr(path : string, name : string) : boolean {
+        return (name == this.getName() && path == this.getPath())
+    }
+
     public log() {
         console.log(this.getPath())
     }
