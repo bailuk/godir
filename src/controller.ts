@@ -60,6 +60,7 @@ export class Controller {
             this.view.listInsertItem(dir)
         })
         this.view.listShowAll()
+        this.view.listSelectRow(1)
         this.view.setStatusText(this.dir.getPath())
     }
 }

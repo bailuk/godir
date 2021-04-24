@@ -11,22 +11,27 @@ const KEY_LEFT  = 65361
 const KEY_RIGHT = 65363
 const KEY_UP    = 65362
 const KEY_ESC   = 65307
+const KEY_ENTER = 65293
 
 export class View {
     readonly PADDING : Number = 5
 
-    private readonly status : any = null
-    private readonly list : any = null
+    private readonly status : any
+    private readonly list : any
+    private readonly search : any
+
     private controller : any = null
+
     
     constructor() {
         const win = this.createWindow()
         this.connectSignals(win)
 
+        this.search =  new Gtk.SearchEntry()
         this.status = this.statusCreate()
         this.list = this.listCreate()
 
-        this.createVBox(win, this.status, this.list)
+        this.createVBox(win)
         
         win.showAll()
     }
@@ -59,27 +64,49 @@ export class View {
                 Gtk.mainQuit()
                 return true
             }
-            
+
+            if (key.keyval == KEY_ENTER) {
+                const index = this.listGetSelectedIndex()
+                if (index > -1) {
+                    this.controller.select(index)
+                    return true
+                }
+            }
+
+            if (key.keyval == KEY_UP) {
+                const index = this.listGetSelectedIndex()
+                if (index > 0) this.listSelectRow(index-1)
+                return true
+            }
+
+            if (key.keyval == KEY_DOWN) {
+                const index = this.listGetSelectedIndex()
+                if (index > -1) this.listSelectRow(index+1)
+                return true
+            }
+
             console.log(key.string, key.keyval, key.state)
             return false
         })
     }
 
 
+    private listGetSelectedIndex() {
+        const row = this.list.getSelectedRow()
+        if (row !== null) return row.getIndex()
+        return -1
+    }
 
-    private createVBox(win: any, status: any, list : any) {
+    private createVBox(win: any) {
         const vbox = new Gtk.VBox()
         win.add(vbox)
 
-        vbox.packStart(status, false, true, this.PADDING)
-
-        const search = new Gtk.SearchEntry()
-        vbox.packStart(search, false, true, this.PADDING)
+        vbox.packStart(this.status, false, true, this.PADDING)
+        vbox.packStart(this.search, false, true, this.PADDING)
 
         const scrolled = new Gtk.ScrolledWindow()
         vbox.packStart(scrolled, true, true, this.PADDING)
-
-        scrolled.add(list)
+        scrolled.add(this.list)
 
         const link = new Gtk.LinkButton()
         vbox.packEnd(link, false, true, this.PADDING)
@@ -104,6 +131,7 @@ export class View {
             const index = row.getIndex()
             this.controller.select(index)
         })
+
         return list
     }
 
@@ -122,6 +150,14 @@ export class View {
         item.setPadding(this.PADDING, this.PADDING)
         item.setHalign(Gtk.Align.START)
         this.list.insert(item, -1)
+    }
+
+    listSelectRow(rowIndex: number) {
+        const row = this.list.getRowAtIndex(rowIndex)
+        if (row !== null) {
+            this.list.selectRow(row)
+            this.search.grabFocus()
+        }
     }
 
     public listShowAll() : void {
