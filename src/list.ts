@@ -70,7 +70,7 @@ export class ListView {
     public select(rowIndex: number) : void {
         const row = this.list.getRowAtIndex(rowIndex)
         if (row !== null) {
-            row.grabFocus()
+            //row.grabFocus()
             this.list.selectRow(row)
         }
     }

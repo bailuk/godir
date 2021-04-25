@@ -18,7 +18,7 @@ export class View {
 
     private readonly status : any
     public  readonly list : ListView
-    private readonly search : any
+    public  readonly search : any
 
     private controller : any = null
 
@@ -28,6 +28,9 @@ export class View {
         this.connectSignals(win)
 
         this.search =  new Gtk.SearchEntry()
+        this.search.on('search-changed', () => {
+            this.controller.updateFilter(this.search.getText())
+        })
 
         this.status = this.statusCreate()
         this.list = new ListView()

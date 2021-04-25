@@ -4,7 +4,6 @@ import { Directory } from './directory';
 import { View } from './view';
 
 import { exec } from 'child_process';
-import { Dir } from 'node:fs';
 
 export class Controller {
 
@@ -14,6 +13,7 @@ export class Controller {
     // model
     private dir : Directory = null
     private model : Directory[] = []
+
     private readonly cache = new Cache()
 
     
@@ -41,6 +41,43 @@ export class Controller {
         })
 
         this.syncModelView()
+        this.view.list.select(1)
+    }
+
+
+    public updateFilter(filter : string) {
+        filter = filter.trim().toLowerCase()
+
+        if (filter == '.') {
+            filter = ''
+        }
+        
+        if (filter == '..') {
+            this.unfilterList()
+            this.view.list.select(0)
+        } else if (filter !== '') {
+            this.filterList(filter)
+        } else {
+            this.unfilterList()
+        }
+    }
+
+
+    public unfilterList() {
+        this.fillList(this.dir.getParentPath(), this.dir.getName())
+    }
+
+    public filterList(filter : string) {
+        this.model = []
+
+        this.dir.forEachChild((child: Directory) => {
+            if (child.getName().toLowerCase().includes(filter)) {
+                this.model.push(child)
+            }
+        })
+
+        this.syncModelView()
+        this.view.list.select(0)
     }
 
 
@@ -88,7 +125,6 @@ export class Controller {
             }
         })
         this.view.list.showAll()
-        this.view.list.select(1)
         this.view.setStatusText(this.dir.getPath())
     }
 }
