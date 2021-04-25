@@ -101,8 +101,7 @@ export class Controller {
         if (index > -1 && index < this.model.length) {
             const dir = this.model[index]
             if (dir.equals(this.dir)) {
-                console.log('current dir selected')
-                //this._execute('thunar ', dir)
+                this.view.menu.popup()
                 
             } else {
                 this.fillList(dir.getParentPath(), dir.getName())

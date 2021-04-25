@@ -1,6 +1,7 @@
 
 import { Gdk, Gtk } from './gtk'
 import { ListView } from './list';
+import { Menu } from './menu';
 
 const KEY_SPC   = 32
 const KEY_G     = 103
@@ -16,9 +17,13 @@ const KEY_ENTER = 65293
 export class View {
     readonly PADDING : Number = 5
 
-    private readonly status : any
-    public  readonly list : ListView
-    public  readonly search : any
+    public readonly status : any
+    public readonly list : ListView
+    public readonly search : any
+    public readonly menu : Menu
+    public readonly locationMenu : Menu
+
+    private scrolled : any
 
     private controller : any = null
 
@@ -26,6 +31,8 @@ export class View {
     constructor() {
         const win = this.createWindow()
         this.connectSignals(win)
+
+        
 
         this.search =  new Gtk.SearchEntry()
         this.search.on('search-changed', () => {
@@ -36,14 +43,18 @@ export class View {
         this.list = new ListView()
 
         win.add(this.createVBox())
-        
         win.showAll()
+
+        this.menu = new Menu(this.scrolled).execution()
+        this.locationMenu = new Menu(this.scrolled).location()
     }
 
     
     public setController(controller : any) : void {
         this.controller = controller
         this.list.setController(controller)
+        this.menu.setController(controller)
+        this.locationMenu.setController(controller)
     }
 
     private createWindow() {
@@ -68,25 +79,12 @@ export class View {
 
 
             if (key.state == 20) {
-                if (key.keyval == 111) {
-                    this.controller.execute('code ')
-                    return true
-                } 
-
-                if (key.keyval == 120) {
-                    this.controller.execute('xfce4-terminal --default-working-directory=')
-                    return true
-                } 
 
                 if (key.keyval == 102 || key.keyval == 115) {
                     this.search.grabFocus()
                     return true
                 }
 
-                if (key.keyval == 116) {
-                    this.controller.execute('thunar ')
-                    return true
-                } 
 
                 if (key.keyval == 104 || key.keyval == 65360) {
                     this.controller.home()
@@ -100,26 +98,13 @@ export class View {
             }
 
             if (key.keyval == 65505) {
-                const menu = new Gtk.Menu()
-                menu.append(this.getMenuItem('_Visual Code'))
-                menu.append(this.getMenuItem('_Terminal'))
-                menu.append(this.getMenuItem('T_hunar'))
-                menu.append(this.getMenuItem('Android _Studio'))
-                menu.append(this.getMenuItem('_Clipbboard...'))
-                menu.showAll()
-                menu.popupAtWidget(this.status, Gdk.Gravity.SOUTH_WEST, Gdk.Gravity.NORTH_EAST)
+                this.menu.popup()
                 return true
             }
 
 
             if (key.keyval == 65506) {
-                const menu = new Gtk.Menu()
-                menu.append(this.getMenuItem('_Home'))
-                menu.append(this.getMenuItem('_Parent'))
-                menu.append(this.getMenuItem('_Filter'))
-                menu.append(this.getMenuItem('_List'))
-                menu.showAll()
-                menu.popupAtWidget(this.status, Gdk.Gravity.SOUTH_EAST, Gdk.Gravity.NORTH_WEST)
+                this.locationMenu.popup()
                 return true
             }
 
@@ -146,12 +131,6 @@ export class View {
     }
 
 
-    private getMenuItem(text: string) : any {
-        const item = new Gtk.MenuItem()
-        item.setLabel(text)
-        item.setUseUnderline(true)
-        return item
-    }
     private createHBox() : any {
         const hbox = new Gtk.HBox()
 
@@ -172,9 +151,9 @@ export class View {
         vbox.packStart(this.status, false, true, this.PADDING)
         vbox.packStart(this.search, false, true, this.PADDING)
 
-        const scrolled = new Gtk.ScrolledWindow()
-        vbox.packStart(scrolled, true, true, this.PADDING)
-        scrolled.add(this.list.getWidget())
+        this.scrolled = new Gtk.ScrolledWindow()
+        vbox.packStart(this.scrolled, true, true, this.PADDING)
+        this.scrolled.add(this.list.getWidget())
 
         const link = new Gtk.LinkButton()
         vbox.packEnd(link, false, true, this.PADDING)
@@ -183,7 +162,7 @@ export class View {
     
         const info = new Gtk.Label()
         vbox.packEnd(info, false, true, this.PADDING)
-        info.setText('Ctl+o: Visual Code, Ctl+x: Terminal, Ctl+t Thunar, Ctl+h: Home, Ctl+u: Parent')
+        info.setText('Ctl+h: Home, Ctl+u: Parent')
    
         return vbox;
     }
