@@ -5,6 +5,7 @@ import { Controller } from './controller';
 
 
 export class ListView {
+   
     readonly PADDING : Number = 5
 
     private readonly list : any
@@ -37,6 +38,16 @@ export class ListView {
         if (row !== null) return row.getIndex()
         return -1
     }
+
+
+    public grabFocus() : void {
+        this.list.grabFocus()
+        const row = this.list.getSelectedRow()
+        if (row !== null) {
+            row.grabFocus()
+        }
+    }
+
 
     public clear() : void {
         const children  = this.list.getChildren()

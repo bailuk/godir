@@ -28,6 +28,7 @@ export class View {
         this.connectSignals(win)
 
         this.search =  new Gtk.SearchEntry()
+
         this.status = this.statusCreate()
         this.list = new ListView()
 
@@ -62,6 +63,15 @@ export class View {
         
         win.on('key-press-event', (key) => {
 
+            if (key.keyval == 65289) {
+                if (this.search.hasFocus()) {
+                    this.list.grabFocus()
+                } else {
+                    this.search.grabFocus()
+                }
+                return true
+            }
+                
             if (key.keyval == KEY_ESC) {
                 Gtk.mainQuit()
                 return true
@@ -71,10 +81,12 @@ export class View {
                 const index = this.list.getSelectedIndex()
                 if (index > -1) {
                     this.controller.select(index)
+                    this.search.grabFocus()
                     return true
                 }
             }
 
+            /*
             if (key.keyval == KEY_UP) {
                 const index = this.list.getSelectedIndex()
                 if (index > 0) this.list.select(index-1)
@@ -88,7 +100,7 @@ export class View {
                 this.search.grabFocus()
                 return true
             }
-
+            */
             console.log(key.string, key.keyval, key.state)
             return false
         })

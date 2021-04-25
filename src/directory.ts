@@ -105,11 +105,11 @@ export class Directory {
 
     
     public equals(dir : Directory) : boolean {
-        return (dir !== null && this.equalsStr(dir.getPath(), dir.getName()))
+        return (dir !== null && this.equalsStr(dir.getParentPath(), dir.getName()))
     }
 
     public equalsStr(path : string, name : string) : boolean {
-        return (name == this.getName() && path == this.getPath())
+        return (name == this.getName() && path == this.getParentPath())
     }
 
     public log() {
