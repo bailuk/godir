@@ -1,5 +1,5 @@
 
-import { Gtk } from './gtk'
+import { Gdk, Gtk } from './gtk'
 import { ListView } from './list';
 
 const KEY_SPC   = 32
@@ -35,7 +35,7 @@ export class View {
         this.status = this.statusCreate()
         this.list = new ListView()
 
-        this.createVBox(win)
+        win.add(this.createVBox())
         
         win.showAll()
     }
@@ -66,54 +66,108 @@ export class View {
         
         win.on('key-press-event', (key) => {
 
-            if (key.keyval == 65289) {
-                if (this.search.hasFocus()) {
-                    this.list.grabFocus()
-                } else {
+
+            if (key.state == 20) {
+                if (key.keyval == 111) {
+                    this.controller.execute('code ')
+                    return true
+                } 
+
+                if (key.keyval == 120) {
+                    this.controller.execute('xfce4-terminal --default-working-directory=')
+                    return true
+                } 
+
+                if (key.keyval == 102 || key.keyval == 115) {
                     this.search.grabFocus()
+                    return true
                 }
+
+                if (key.keyval == 116) {
+                    this.controller.execute('thunar ')
+                    return true
+                } 
+
+                if (key.keyval == 104 || key.keyval == 65360) {
+                    this.controller.home()
+                    return true
+                } 
+
+                if (key.keyval == 117 || key.keyval == 65362) {
+                    this.controller.parent()
+                    return true
+                } 
+            }
+
+            if (key.keyval == 65505) {
+                const menu = new Gtk.Menu()
+                menu.append(this.getMenuItem('_Visual Code'))
+                menu.append(this.getMenuItem('_Terminal'))
+                menu.append(this.getMenuItem('T_hunar'))
+                menu.append(this.getMenuItem('Android _Studio'))
+                menu.append(this.getMenuItem('_Clipbboard...'))
+                menu.showAll()
+                menu.popupAtWidget(this.status, Gdk.Gravity.SOUTH_WEST, Gdk.Gravity.NORTH_EAST)
                 return true
             }
-                
+
+
+            if (key.keyval == 65506) {
+                const menu = new Gtk.Menu()
+                menu.append(this.getMenuItem('_Home'))
+                menu.append(this.getMenuItem('_Parent'))
+                menu.append(this.getMenuItem('_Filter'))
+                menu.append(this.getMenuItem('_List'))
+                menu.showAll()
+                menu.popupAtWidget(this.status, Gdk.Gravity.SOUTH_EAST, Gdk.Gravity.NORTH_WEST)
+                return true
+            }
+
+            if (key.keyval == 65289) {
+                if (!this.search.hasFocus()) {
+                    this.search.grabFocus()
+                    return true
+                }
+            }
+
+
             if (key.keyval == KEY_ESC) {
                 Gtk.mainQuit()
                 return true
             }
 
             if (key.keyval == KEY_ENTER) {
-                const index = this.list.getSelectedIndex()
-                if (index > -1) {
-                    this.controller.select(index)
-                    this.search.grabFocus()
-                    return true
-                }
+                return this.controller.select()
             }
 
-            /*
-            if (key.keyval == KEY_UP) {
-                const index = this.list.getSelectedIndex()
-                if (index > 0) this.list.select(index-1)
-                this.search.grabFocus()
-                return true
-            }
-
-            if (key.keyval == KEY_DOWN) {
-                const index = this.list.getSelectedIndex()
-                if (index > -1) this.list.select(index+1)
-                this.search.grabFocus()
-                return true
-            }
-            */
             console.log(key.string, key.keyval, key.state)
             return false
         })
     }
 
 
+    private getMenuItem(text: string) : any {
+        const item = new Gtk.MenuItem()
+        item.setLabel(text)
+        item.setUseUnderline(true)
+        return item
+    }
+    private createHBox() : any {
+        const hbox = new Gtk.HBox()
 
-    private createVBox(win: any) {
+        const places = new Gtk.PlacesSidebar()
+        places.on('open-location', (location, flags) => {
+            console.log(location.getBasename, location.getParseName)
+        })
+        hbox.packStart(places, false, true, this.PADDING)
+
+        const vbox = this.createVBox()
+        hbox.packStart(vbox, true, true, this.PADDING)
+        return hbox
+    }
+
+    private createVBox() : any {
         const vbox = new Gtk.VBox()
-        win.add(vbox)
 
         vbox.packStart(this.status, false, true, this.PADDING)
         vbox.packStart(this.search, false, true, this.PADDING)
@@ -129,7 +183,9 @@ export class View {
     
         const info = new Gtk.Label()
         vbox.packEnd(info, false, true, this.PADDING)
-        info.setText('Info')
+        info.setText('Ctl+o: Visual Code, Ctl+x: Terminal, Ctl+t Thunar, Ctl+h: Home, Ctl+u: Parent')
+   
+        return vbox;
     }
 
     private statusCreate() : any {

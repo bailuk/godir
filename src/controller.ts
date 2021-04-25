@@ -4,6 +4,8 @@ import { Directory } from './directory';
 import { View } from './view';
 
 import { exec } from 'child_process';
+import {homedir} from 'os'
+
 
 export class Controller {
 
@@ -81,21 +83,49 @@ export class Controller {
     }
 
 
-    public select(index : number) {
-        if (index < this.model.length) {
+    public home() : boolean {
+        Directory.split(homedir(), (dirName, baseName) => {
+            this.fillList(dirName, baseName)
+        })
+        return true
+    }
+
+    public parent() : boolean {
+        this.fillList(this.dir.getParent(this.cache).getParentPath(), this.dir.getParent(this.cache).getName())
+        return true
+    }
+    
+
+    public select() : boolean {
+        const index = this.view.list.getSelectedIndex()
+        if (index > -1 && index < this.model.length) {
             const dir = this.model[index]
             if (dir.equals(this.dir)) {
-                this.runThunar(dir)
+                console.log('current dir selected')
+                //this._execute('thunar ', dir)
                 
             } else {
                 this.fillList(dir.getParentPath(), dir.getName())
+                this.view.search.setText('')
             }
+            return true
         }
+        return false
     }
 
 
-    public runThunar(dir : Directory) {    
-        const command = `thunar ${dir.getPath()}`
+    public execute(command : string) : boolean {
+        const index = this.view.list.getSelectedIndex()
+        if (index > -1 && index < this.model.length) {
+            this._execute(command, this.model[index])
+            return true
+        }
+        return false
+    }
+
+
+    private _execute(command: string, dir: Directory){
+        command = `${command}${dir.getPath()}`
 
         exec(command, (err, stdout, stderr) => {
             if (err) {
@@ -107,7 +137,7 @@ export class Controller {
             console.log(`stderr: ${stderr}`);
       });
     }
-      
+
 
     private syncModelView() {
         this.view.list.clear()
