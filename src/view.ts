@@ -1,6 +1,6 @@
 
 import { Gtk } from './gtk'
-import { Directory } from './directory';
+import { ListView } from './list';
 
 const KEY_SPC   = 32
 const KEY_G     = 103
@@ -17,7 +17,7 @@ export class View {
     readonly PADDING : Number = 5
 
     private readonly status : any
-    private readonly list : any
+    public  readonly list : ListView
     private readonly search : any
 
     private controller : any = null
@@ -29,15 +29,17 @@ export class View {
 
         this.search =  new Gtk.SearchEntry()
         this.status = this.statusCreate()
-        this.list = this.listCreate()
+        this.list = new ListView()
 
         this.createVBox(win)
         
         win.showAll()
     }
 
+    
     public setController(controller : any) : void {
         this.controller = controller
+        this.list.setController(controller)
     }
 
     private createWindow() {
@@ -66,7 +68,7 @@ export class View {
             }
 
             if (key.keyval == KEY_ENTER) {
-                const index = this.listGetSelectedIndex()
+                const index = this.list.getSelectedIndex()
                 if (index > -1) {
                     this.controller.select(index)
                     return true
@@ -74,14 +76,16 @@ export class View {
             }
 
             if (key.keyval == KEY_UP) {
-                const index = this.listGetSelectedIndex()
-                if (index > 0) this.listSelectRow(index-1)
+                const index = this.list.getSelectedIndex()
+                if (index > 0) this.list.select(index-1)
+                this.search.grabFocus()
                 return true
             }
 
             if (key.keyval == KEY_DOWN) {
-                const index = this.listGetSelectedIndex()
-                if (index > -1) this.listSelectRow(index+1)
+                const index = this.list.getSelectedIndex()
+                if (index > -1) this.list.select(index+1)
+                this.search.grabFocus()
                 return true
             }
 
@@ -91,11 +95,6 @@ export class View {
     }
 
 
-    private listGetSelectedIndex() {
-        const row = this.list.getSelectedRow()
-        if (row !== null) return row.getIndex()
-        return -1
-    }
 
     private createVBox(win: any) {
         const vbox = new Gtk.VBox()
@@ -106,7 +105,7 @@ export class View {
 
         const scrolled = new Gtk.ScrolledWindow()
         vbox.packStart(scrolled, true, true, this.PADDING)
-        scrolled.add(this.list)
+        scrolled.add(this.list.getWidget())
 
         const link = new Gtk.LinkButton()
         vbox.packEnd(link, false, true, this.PADDING)
@@ -122,46 +121,6 @@ export class View {
         const status = new Gtk.Label()
         status.setHalign(Gtk.Align.START)
         return status
-    }
-
-    private listCreate() : any {
-        const list = new Gtk.ListBox()
-        list.setActivateOnSingleClick(false)
-        list.on('row-activated', (row : any) => {
-            const index = row.getIndex()
-            this.controller.select(index)
-        })
-
-        return list
-    }
-
-    public listClear() : void {
-        const children  = this.list.getChildren()
-
-        children.forEach(element => {
-            this.list.remove(element)
-        });
-        
-    }
-
-    public listInsertItem(dir : Directory) : void {
-        let item  = new Gtk.Label()
-        item.setText(dir.getPath())
-        item.setPadding(this.PADDING, this.PADDING)
-        item.setHalign(Gtk.Align.START)
-        this.list.insert(item, -1)
-    }
-
-    listSelectRow(rowIndex: number) {
-        const row = this.list.getRowAtIndex(rowIndex)
-        if (row !== null) {
-            this.list.selectRow(row)
-            this.search.grabFocus()
-        }
-    }
-
-    public listShowAll() : void {
-        this.list.showAll()
     }
 
     public setStatusText(text : string) : void {

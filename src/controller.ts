@@ -3,6 +3,8 @@ import { Cache } from './cache';
 import { Directory } from './directory';
 import { View } from './view';
 
+import { exec } from 'child_process';
+import { Dir } from 'node:fs';
 
 export class Controller {
 
@@ -46,7 +48,8 @@ export class Controller {
         if (index < this.model.length) {
             const dir = this.model[index]
             if (dir.equals(this.dir)) {
-                console.log(`open ${dir.getPath()}`)
+                this.runThunar(dir)
+                
             } else {
                 this.fillList(dir.getParentPath(), dir.getName())
             }
@@ -54,13 +57,38 @@ export class Controller {
     }
 
 
+    public runThunar(dir : Directory) {    
+        const command = `thunar ${dir.getPath()}`
+
+        exec(command, (err, stdout, stderr) => {
+            if (err) {
+                console.log(`ERROR: ${command}`)
+                return;
+            }
+      
+            console.log(`stdout: ${stdout}`);
+            console.log(`stderr: ${stderr}`);
+      });
+    }
+      
+
     private syncModelView() {
-        this.view.listClear()
+        this.view.list.clear()
         this.model.forEach(dir => {
-            this.view.listInsertItem(dir)
+            let path = dir.getParentPath()
+            let name = dir.getName()
+
+            if (path == '/') path = ''
+
+
+            if (dir.equals(this.dir)) {
+                this.view.list.insert(`<big>${path}/<b>${name}</b></big>`)
+            } else {
+                this.view.list.insert(`${path}/<b>${name}</b>`)
+            }
         })
-        this.view.listShowAll()
-        this.view.listSelectRow(1)
+        this.view.list.showAll()
+        this.view.list.select(1)
         this.view.setStatusText(this.dir.getPath())
     }
 }
