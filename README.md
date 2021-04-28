@@ -15,4 +15,5 @@ In project root:
 tsc --outDir target/ src/main.ts
 node target/main.js
 ```
-
+## start TypeScript compiler in watch mode
+`tsc --outDir target/ src/main.ts -w`
