@@ -101,7 +101,7 @@ export class Controller {
         if (index > -1 && index < this.model.length) {
             const dir = this.model[index]
             if (dir.equals(this.dir)) {
-                this.view.menu.popup()
+                this.view.executionMenu.popup()
                 
             } else {
                 this.fillList(dir.getParentPath(), dir.getName())

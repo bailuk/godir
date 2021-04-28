@@ -20,10 +20,10 @@ export class View {
     public readonly status : any
     public readonly list : ListView
     public readonly search : any
-    public readonly menu : Menu
+    public readonly executionMenu : Menu
     public readonly locationMenu : Menu
 
-    private scrolled : any
+    private readonly scrolled : any
 
     private controller : any = null
 
@@ -32,8 +32,7 @@ export class View {
         const win = this.createWindow()
         this.connectSignals(win)
 
-        
-
+        this.scrolled = new Gtk.ScrolledWindow()
         this.search =  new Gtk.SearchEntry()
         this.search.on('search-changed', () => {
             this.controller.updateFilter(this.search.getText())
@@ -45,7 +44,7 @@ export class View {
         win.add(this.createVBox())
         win.showAll()
 
-        this.menu = new Menu(this.scrolled).execution()
+        this.executionMenu = new Menu(this.scrolled).execution()
         this.locationMenu = new Menu(this.scrolled).location()
     }
 
@@ -53,7 +52,7 @@ export class View {
     public setController(controller : any) : void {
         this.controller = controller
         this.list.setController(controller)
-        this.menu.setController(controller)
+        this.executionMenu.setController(controller)
         this.locationMenu.setController(controller)
     }
 
@@ -75,7 +74,7 @@ export class View {
         //     return true
         // })
         
-        win.on('key-press-event', (key) => {
+        win.on('key-press-event', (key : any) => {
 
 
             if (key.state == 20) {
@@ -98,7 +97,7 @@ export class View {
             }
 
             if (key.keyval == 65505) {
-                this.menu.popup()
+                this.executionMenu.popup()
                 return true
             }
 
@@ -135,7 +134,7 @@ export class View {
         const hbox = new Gtk.HBox()
 
         const places = new Gtk.PlacesSidebar()
-        places.on('open-location', (location, flags) => {
+        places.on('open-location', (location : any, flags : any) => {
             console.log(location.getBasename, location.getParseName)
         })
         hbox.packStart(places, false, true, this.PADDING)
@@ -150,8 +149,6 @@ export class View {
 
         vbox.packStart(this.status, false, true, this.PADDING)
         vbox.packStart(this.search, false, true, this.PADDING)
-
-        this.scrolled = new Gtk.ScrolledWindow()
         vbox.packStart(this.scrolled, true, true, this.PADDING)
         this.scrolled.add(this.list.getWidget())
 
