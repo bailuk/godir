@@ -25,7 +25,7 @@ export class Controller {
     }
 
 
-    public fillList(dirname : string, basename : string) : void {
+    public async fillList(dirname : string, basename : string) {
         this.dir = this.cache.insert(dirname, basename)
         const parent = this.dir.getParent(this.cache)
 
@@ -47,7 +47,7 @@ export class Controller {
     }
 
 
-    public updateFilter(filter : string) {
+    public async updateFilter(filter : string) {
         filter = filter.trim().toLowerCase()
 
         if (filter == '.') {
@@ -65,11 +65,11 @@ export class Controller {
     }
 
 
-    public unfilterList() {
+    public async unfilterList() {
         this.fillList(this.dir.getParentPath(), this.dir.getName())
     }
 
-    public filterList(filter : string) {
+    public async filterList(filter : string) {
         this.model = []
 
         this.dir.forEachChild((child: Directory) => {
@@ -83,20 +83,20 @@ export class Controller {
     }
 
 
-    public home() : boolean {
+    public async home() : Promise<boolean> {
         Directory.split(homedir(), (dirName, baseName) => {
             this.fillList(dirName, baseName)
         })
         return true
     }
 
-    public parent() : boolean {
+    public async parent() : Promise<boolean> {
         this.fillList(this.dir.getParent(this.cache).getParentPath(), this.dir.getParent(this.cache).getName())
         return true
     }
     
 
-    public select() : boolean {
+    public async select() {
         const index = this.view.list.getSelectedIndex()
         if (index > -1 && index < this.model.length) {
             const dir = this.model[index]
@@ -107,13 +107,11 @@ export class Controller {
                 this.fillList(dir.getParentPath(), dir.getName())
                 this.view.search.setText('')
             }
-            return true
         }
-        return false
     }
 
 
-    public execute(command : string) : boolean {
+    public async execute(command : string) : Promise<boolean> {
         const index = this.view.list.getSelectedIndex()
         if (index > -1 && index < this.model.length) {
             this._execute(command, this.model[index])
@@ -123,7 +121,7 @@ export class Controller {
     }
 
 
-    private _execute(command: string, dir: Directory){
+    private _execute(command: string, dir: Directory) : void{
         command = `${command}${dir.getPath()}`
 
         exec(command, (err, stdout, stderr) => {

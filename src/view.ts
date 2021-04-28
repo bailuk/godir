@@ -121,7 +121,8 @@ export class View {
             }
 
             if (key.keyval == KEY_ENTER) {
-                return this.controller.select()
+                this.controller.select()
+                return true
             }
 
             console.log(key.string, key.keyval, key.state)
